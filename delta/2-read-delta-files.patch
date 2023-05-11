@@ -1,0 +1,60 @@
+diff -ruN cur new || true
+diff -ruN cur/run_tests.sh new/run_tests.sh
+--- cur/run_tests.sh	2023-05-11 17:56:20.262691390 +0200
++++ new/run_tests.sh	2023-05-11 17:56:29.102691541 +0200
+@@ -8,9 +8,31 @@
+ 
+ mkdir delta
+ for l in $(../pw --deltas); do
+-	print "not expecting line '$l'" >&2
++	echo "not expecting line '$l'" >&2
+ 	exit 10
+ done
+ 
++# [AKR2] 2 Zeilen
++
++files=("1-first.patch" "2-2nd.patch")
++for f in ${files[*]}; do touch delta/$f; done
++
++i=0
++for l in $(../pw --deltas); do
++	if ((i == ${#files[@]})); then
++		echo "not expecting line '$l'" >&2
++		exit 10
++	fi
++	if [[ $l != ${files[$i]} ]]; then
++		echo "expecting '${files[$i]}' but got '$l'" >&2
++		exit 10
++	fi
++	((i++))
++done
++if ((i != ${#files[@]})); then
++	echo "not enough lines; got $i but expected ${#files[@]}" >&2
++	exit 10
++fi
++
+ cd ..
+ rm -Rf tmp
+diff -ruN cur/src/pw.cpp new/src/pw.cpp
+--- cur/src/pw.cpp	2023-05-11 17:56:20.262691390 +0200
++++ new/src/pw.cpp	2023-05-11 17:56:29.102691541 +0200
+@@ -1,3 +1,19 @@
++#include <filesystem>
++#include <iostream>
++#include <map>
++
+ int main(int argc, const char *argv[]) {
++	std::map<int, std::string> deltas;
++	for (const auto &f : std::filesystem::directory_iterator { "delta" }) {
++		std::string p = f.path().filename().string();
++		int v = 0;
++		for (const char *c = p.c_str(); isdigit(*c); ++c) {
++			v = v * 10 + (*c - '0');
++		}
++		deltas[v] = p;
++	}
++	for (const auto &e : deltas) {
++		std::cout << e.second << '\n';
++	}
+ 	return 0;
+ }

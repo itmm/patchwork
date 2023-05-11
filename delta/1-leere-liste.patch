@@ -1,15 +1,6 @@
-make -C cur clean
-make[1]: Entering directory '/home/timm/patchwork/cur'
-rm -f pw src/*.o
-make[1]: Leaving directory '/home/timm/patchwork/cur'
-make -C new clean
-make[1]: Entering directory '/home/timm/patchwork/new'
-rm -f pw src/*.o
-make[1]: Leaving directory '/home/timm/patchwork/new'
-diff -ruN cur new || true
 diff -ruN cur/akr/1-keine-deltas.md new/akr/1-keine-deltas.md
 --- cur/akr/1-keine-deltas.md	1970-01-01 01:00:00.000000000 +0100
-+++ new/akr/1-keine-deltas.md	2023-05-11 15:03:22.892514361 +0200
++++ new/akr/1-keine-deltas.md	2023-05-11 17:31:30.862665982 +0200
 @@ -0,0 +1,4 @@
 +# Keine Deltas
 +
@@ -17,7 +8,7 @@ diff -ruN cur/akr/1-keine-deltas.md new/akr/1-keine-deltas.md
 +2. Der Aufruf `pw --deltas` liefert keine Ausgabe.
 diff -ruN cur/akr/2-liste-von-2-deltas.md new/akr/2-liste-von-2-deltas.md
 --- cur/akr/2-liste-von-2-deltas.md	1970-01-01 01:00:00.000000000 +0100
-+++ new/akr/2-liste-von-2-deltas.md	2023-05-11 15:03:50.202514827 +0200
++++ new/akr/2-liste-von-2-deltas.md	2023-05-11 17:31:30.862665982 +0200
 @@ -0,0 +1,6 @@
 +# Liste von zwei Deltas
 +
@@ -27,34 +18,56 @@ diff -ruN cur/akr/2-liste-von-2-deltas.md new/akr/2-liste-von-2-deltas.md
 +
 diff -ruN cur/anf/1-liste-aller-deltas.md new/anf/1-liste-aller-deltas.md
 --- cur/anf/1-liste-aller-deltas.md	1970-01-01 01:00:00.000000000 +0100
-+++ new/anf/1-liste-aller-deltas.md	2023-05-11 14:27:21.122477483 +0200
++++ new/anf/1-liste-aller-deltas.md	2023-05-11 17:31:30.862665982 +0200
 @@ -0,0 +1,3 @@
 +# Liste aller Deltas
 +
 +1. Erstelle Liste aller Patches im `delta`-Verzeichnis
+diff -ruN cur/Makefile new/Makefile
+--- cur/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ new/Makefile	2023-05-11 17:33:14.122667744 +0200
+@@ -0,0 +1,15 @@
++.PHONY: all clean
++
++CXXFLAGS += -std=c++17 -g -Wall -Isrc
++
++all: pw run_tests.sh
++	./run_tests.sh
++
++%.o:%.cpp
++	$(CXX) $(CXXFLAGS) -c $^ -o$@
++
++pw: src/pw.o
++	$(CXX) $(CXXFLAGS) $^ -o$@
++
++clean:
++	rm -f pw src/*.o 
+Binary files cur/pw and new/pw differ
 diff -ruN cur/run_tests.sh new/run_tests.sh
 --- cur/run_tests.sh	1970-01-01 01:00:00.000000000 +0100
-+++ new/run_tests.sh	2023-05-11 15:10:42.622521862 +0200
-@@ -0,0 +1,15 @@
++++ new/run_tests.sh	2023-05-11 17:31:30.862665982 +0200
+@@ -0,0 +1,16 @@
 +#!/bin/bash
 +
 +rm -Rf tmp
 +mkdir tmp
 +cd tmp
 +
-+# [AKR2] Keine Deltas
++# [AKR1] Keine Deltas
 +
 +mkdir delta
-+for l in $(../pw); do
++for l in $(../pw --deltas); do
 +	print "not expecting line '$l'" >&2
 +	exit 10
 +done
 +
++cd ..
 +rm -Rf tmp
 diff -ruN cur/src/pw.cpp new/src/pw.cpp
 --- cur/src/pw.cpp	1970-01-01 01:00:00.000000000 +0100
-+++ new/src/pw.cpp	2023-05-11 15:06:12.482517254 +0200
++++ new/src/pw.cpp	2023-05-11 17:31:30.862665982 +0200
 @@ -0,0 +1,3 @@
 +int main(int argc, const char *argv[]) {
 +	return 0;
 +}
+Binary files cur/src/pw.o and new/src/pw.o differ
